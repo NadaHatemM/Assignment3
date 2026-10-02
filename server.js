@@ -7,7 +7,7 @@ app.use(express.json());
 
 const filePath = path.join(__dirname, "users.json");
 
-// Read users. If the file is missing or empty, start with an empty object.
+// Read users
 function readUsers() {
   if (!fs.existsSync(filePath)) {
     fs.writeFileSync(filePath, "{}");
@@ -74,7 +74,7 @@ app.patch("/user/:id", (req, res) => {
   const id = req.params.id;
 
   if (!Object.hasOwn(users, id)) {
-    return res.status(404).json({ message: "User not found." });
+    return res.status(404).json({ message: "User ID not found." });
   }
 
   const { name, age, email } = req.body;
@@ -109,7 +109,7 @@ function deleteUser(req, res) {
   const users = readUsers();
 
   if (!Object.hasOwn(users, id)) {
-    return res.status(404).json({ message: "User not found." });
+    return res.status(404).json({ message: "User ID not found." });
   }
 
   delete users[id];
@@ -123,21 +123,22 @@ app.delete("/user", deleteUser);
 
 // Q4: Get a user by name
 app.get("/user/getByName", (req, res) => {
-  const name = req.query.name;
-  const users = readUsers();
+const name = req.query.name;
+if (!name) return res.status(400).json({ message: "Name is required." });
+const users = readUsers();
 
-  for (const id in users) {
+for (const id in users) {
     if (users[id].name.toLowerCase() === name.toLowerCase()) {
-      return res.json(users[id]);
+    return res.json(users[id]);
     }
-  }
+}
 
-  res.status(404).json({ message: "User name not found." });
+res.status(404).json({ message: "User name not found." });
 });
 
 // Q5: Get all users
 app.get("/user", (req, res) => {
-  res.json(readUsers());
+  res.json(Object.values(readUsers()));
 });
 
 // Q6: Filter users by minimum age
@@ -153,25 +154,24 @@ app.get("/user/filter", (req, res) => {
   }
 
   if (Object.keys(result).length === 0) {
-    return res.status(404).json({ message: "No user found." });
-  }
+    return res.status(404).json({ message: "no user found" });
+}
 
-  res.json(result);
+res.json(Object.values(result));
 });
 
 // Q7: Get a user by ID
-// Keep this after the other GET routes.
 app.get("/user/:id", (req, res) => {
-  const users = readUsers();
-  const id = req.params.id;
+const users = readUsers();
+const id = req.params.id;
 
-  if (!Object.hasOwn(users, id)) {
+if (!Object.hasOwn(users, id)) {
     return res.status(404).json({ message: "User not found." });
-  }
+}
 
-  res.json(users[id]);
+res.json(users[id]);
 });
 
 app.listen(3001, () => {
-  console.log("Server is running on port 3001");
+console.log("Server is running on port 3001");
 });
